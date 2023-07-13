@@ -1,0 +1,51 @@
+pipeline{
+
+agent any
+tools{
+maven 'maven3.9.2'
+}
+stages
+{
+stage('fetchingthelatestcode'){
+steps{
+git branch: 'stage', credentialsId: '3f5d0c12-54e0-4e8d-96fc-be7b3ee47297', url: 'https://github.com/subbaramireddybhavanam/maven-web-application.git'
+}
+}
+stage('Build'){
+steps{
+sh "mvn clean package"
+}
+}
+stage('Sonarrepotgeneration'){
+steps{
+sh "mvn clean sonar:sonar"
+}
+}
+stage('Nexus'){
+steps{
+sh "mvn clean deploy"
+}
+}
+stage('DeploytoTomcat'){
+steps{
+sshagent(['a0cd9e71-39e8-4554-ad4a-e23963bc4a3c']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@44.212.24.232:/opt/apache-tomcat-9.0.75/webapps"
+}
+}
+}
+}
+post{
+success{
+emailext body: '''BuildOver
+
+Thanks
+Subbu''', subject: 'BuildOver', to: 'subbaramireddy25@gmail.com'
+}
+failure{
+emailext body: '''BuildOver
+
+Thanks
+Subbu''', subject: 'BuildOver', to: 'subbaramireddy25@gmail.com'
+}
+}
+}
