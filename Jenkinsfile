@@ -1,6 +1,8 @@
 pipeline{
 
-agent any
+agent {
+  label 'webapplication-node1'
+}
 
 tools{
 maven 'maven3.8.2'
